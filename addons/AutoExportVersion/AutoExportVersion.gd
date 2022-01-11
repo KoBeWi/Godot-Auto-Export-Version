@@ -71,7 +71,11 @@ class Exporter extends EditorExportPlugin:
 	var plugin
 	
 	func _export_begin(features: PoolStringArray, is_debug: bool, path: String, flags: int):
-		store_version(plugin._fetch_version(features, is_debug, path, flags))
+		var version: String = plugin._fetch_version(features, is_debug, path, flags)
+		if version.empty():
+			push_error("Version string is empty. Make sure your _fetch_version() is configured properly.")
+		
+		store_version(version)
 
 	func store_version(version: String):
 		var script = GDScript.new()
