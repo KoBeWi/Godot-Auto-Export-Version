@@ -54,10 +54,10 @@ func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, fla
 
 ### Unimportant stuff here.
 
-var exporter: Exporter
+var exporter: AEVExporter
 
 func _enter_tree() -> void:
-	exporter = Exporter.new()
+	exporter = AEVExporter.new()
 	exporter.plugin = self
 	add_export_plugin(exporter)
 	
@@ -67,7 +67,7 @@ func _enter_tree() -> void:
 func _exit_tree() -> void:
 	remove_export_plugin(exporter)
 
-class Exporter extends EditorExportPlugin:
+class AEVExporter extends EditorExportPlugin:
 	var plugin
 	
 	func _export_begin(features: PoolStringArray, is_debug: bool, path: String, flags: int):
