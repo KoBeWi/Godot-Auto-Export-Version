@@ -26,3 +26,8 @@ func _ready():
 Attach it to any Label and it will display the current version and auto-update after each project export. Now you can forget about it, because it's all automatic.
 
 ![](https://github.com/KoBeWi/Godot-Auto-Export-Version/blob/master/Media/ReadmeV3.png)
+
+___
+You can find all my addons on my [profile page](https://github.com/KoBeWi).
+
+<a href='https://ko-fi.com/W7W7AD4W4' target='_blank'><img height='36' style='border:0px;height:36px;' src='https://cdn.ko-fi.com/cdn/kofi1.png?v=3' border='0' alt='Buy Me a Coffee at ko-fi.com' /></a>
