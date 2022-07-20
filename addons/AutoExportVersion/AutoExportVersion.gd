@@ -8,7 +8,8 @@ const VERSION_SCRIPT_PATH = "res://version.gd"
 ## Two example ways of doing so are provided, just uncomment one of them.
 ## You can use the arguments to customize your version based on selected platform or something.
 func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, flags: int) -> String:
-	### Git version
+	### Git version ### ---------------------------------------------------------------------------
+	
 	# Version is number of commits. Requires git installed
 	# and project inside git repository with at least 1 commit.
 	
@@ -19,7 +20,8 @@ func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, fla
 #	else:
 #		return output[0].trim_suffix("\n")
 	
-	### Profile version
+	### Profile version ### -----------------------------------------------------------------------
+	
 	# Extracts version from an export profile. Requires export_presets.cfg to exist. 
 	# The version will be taken from the first profile that contains non-empty value
 	# in one of the version_keys.
@@ -60,12 +62,19 @@ func _enter_tree() -> void:
 	exporter = AEVExporter.new()
 	exporter.plugin = self
 	add_export_plugin(exporter)
+	add_tool_menu_item("Print Current Version", self, "print_version")
 	
 	if not File.new().file_exists(VERSION_SCRIPT_PATH):
 		exporter.store_version(_fetch_version(PoolStringArray(), true, "", 0))
 
 func _exit_tree() -> void:
 	remove_export_plugin(exporter)
+	remove_tool_menu_item("Print Current Version")
+
+func print_version(ud):
+	var v = _fetch_version(PoolStringArray(), true, "", 0)
+	OS.alert("Current game version: %s" % v)
+	print(v)
 
 class AEVExporter extends EditorExportPlugin:
 	var plugin
