@@ -31,24 +31,63 @@ func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, fla
 #	var config := ConfigFile.new()
 #	if config.load("res://export_presets.cfg") == OK:
 #		var version := ""
+#		var found: bool
+#
 #		for section in config.get_sections():
 #			if section.ends_with(".options"):
 #				for key in config.get_section_keys(section):
 #					for check_key in version_keys:
 #						if key.ends_with(check_key):
 #							version = str(config.get_value(section, key))
+#							found = true
 #
-#						if not version.empty():
+#						if found:
 #							break
-#				if not version.empty():
+#				if found:
 #					break
-#			if not version.empty():
+#			if found:
 #				break
 #
-#		if version.empty():
+#		if not found:
 #			push_error("Failed to fetch version. No valid version key found in export profiles.")
 #		else:
 #			return version
+#	else:
+#		push_error("Failed to fetch version. export_presets.cfg does not exist.")
+	
+	### Android version ### -----------------------------------------------------------------------
+	
+	# Similar to profile version, but uses only Android version code and name.
+	# Edit it if you want to format the version differently.
+	
+#	var config := ConfigFile.new()
+#	if config.load("res://export_presets.cfg") == OK:
+#		var code := ""
+#		var vname := ""
+#		var found: int
+#
+#		for section in config.get_sections():
+#			if section.ends_with(".options"):
+#				for key in config.get_section_keys(section):
+#					if key == "version/code":
+#						code = str(config.get_value(section, key))
+#						found |= 1
+#					elif key == "version/name":
+#						vname = str(config.get_value(section, key))
+#						found |= 2
+#
+#						if found == 3:
+#							break
+#				if found == 3:
+#					break
+#			if found == 3:
+#				break
+#
+#		if found != 3:
+#			push_error("Failed to fetch version. No valid version code and name found in export profiles.")
+#		else:
+#			# Edit formatting here.
+#			return "%s %s" % [code, vname]
 #	else:
 #		push_error("Failed to fetch version. export_presets.cfg does not exist.")
 	
@@ -73,8 +112,11 @@ func _exit_tree() -> void:
 
 func print_version(ud):
 	var v = _fetch_version(PoolStringArray(), true, "", 0)
-	OS.alert("Current game version: %s" % v)
-	print(v)
+	if v.empty():
+		OS.alert("Error fetching version. Check console for details.")
+	else:
+		OS.alert("Current game version: %s" % v)
+		print(v)
 
 class AEVExporter extends EditorExportPlugin:
 	var plugin
