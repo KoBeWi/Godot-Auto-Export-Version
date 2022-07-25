@@ -8,9 +8,10 @@ Every time you export the project, a special script that contains current versio
 
 Before enabling the plugin, open `AutoExportVersion.gd` file to configure it. Change the `VERSION_SCRIPT_PATH` to your liking. This file will be used later in your scenes.
 
-Another important thing is `_fetch_version()` method. Perfectly, it should return a String from some external source that contains your current version. 2 "version providers" are included by default:
+Another important thing is `_fetch_version()` method. Perfectly, it should return a String from some external source that contains your current version. 3 "version providers" are included by default:
 - Git version. If your project is inside git repository, the plugin will fetch the number of commits and use it as current version.
-- Export presets. If you have export presets that contain some version string (e.g. for Android), this will fetch the version from that profile. Normally it's not possible to display this version in the project, hence the plugin is useful.
+- Profile version. If you have export presets that contain some version string (e.g. for Android), this will fetch the version from that profile. Normally it's not possible to display this version in the project, hence the plugin is useful.
+- Android version. Same as above, but specialized for Android. Instead of version field, it uses both version code and version name and you can customize what format is used to display it.
 
 To use any of these providers, just uncomment the lines starting with `#`. Or you can write a custom one (also if you have some good idea, you can open an issue and it might be officially included with this plugin).
 
@@ -26,6 +27,8 @@ func _ready():
 Attach it to any Label and it will display the current version and auto-update after each project export. Now you can forget about it, because it's all automatic.
 
 ![](https://github.com/KoBeWi/Godot-Auto-Export-Version/blob/master/Media/ReadmeV3.png)
+
+If you want to print the current version without exporting the project, you can use the option in Project -> Tools menu called 'Print Current Version'.
 
 ___
 You can find all my addons on my [profile page](https://github.com/KoBeWi).
