@@ -22,7 +22,7 @@ func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, fla
 
 	### Git branch version ### --------------------------------------------------------------------
 	
-	# Version is the current branch name, useful for feature branches like 'release-1.0.0'
+	# Version is the current branch name. Useful for feature branches like 'release-1.0.0'
 	# Requires git installed and project inside git repository.
 
 #	var output := []
