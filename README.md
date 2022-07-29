@@ -10,6 +10,7 @@ Before enabling the plugin, open `AutoExportVersion.gd` file to configure it. Ch
 
 Another important thing is `_fetch_version()` method. Perfectly, it should return a String from some external source that contains your current version. 3 "version providers" are included by default:
 - Git version. If your project is inside git repository, the plugin will fetch the number of commits and use it as current version.
+- Git branch version. If your project is inside git repository, the plugin will fetch the current branch's name.
 - Profile version. If you have export presets that contain some version string (e.g. for Android), this will fetch the version from that profile. Normally it's not possible to display this version in the project, hence the plugin is useful.
 - Android version. Same as above, but specialized for Android. Instead of version field, it uses both version code and version name and you can customize what format is used to display it.
 
