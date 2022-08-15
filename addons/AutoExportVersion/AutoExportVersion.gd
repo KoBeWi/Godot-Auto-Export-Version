@@ -19,18 +19,32 @@ func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, fla
 #		push_error("Failed to fetch version. Make sure you have git installed and project is inside valid git directory.")
 #	else:
 #		return output[0].trim_suffix("\n")
-
+	
 	### Git branch version ### --------------------------------------------------------------------
 	
 	# Version is the current branch name. Useful for feature branches like 'release-1.0.0'
 	# Requires git installed and project inside git repository.
-
+	
 #	var output := []
 #	OS.execute("git", PoolStringArray(["rev-parse", "--abbrev-ref", "HEAD"]), true, output)
 #	if output.empty() or output[0].empty():
 #		push_error("Failed to fetch version. Make sure you have git installed and project is inside valid git directory.")
 #	else:
 #		return output[0].trim_suffix("\n")
+	
+	### Git commit hash ### -----------------------------------------------------------------------
+	
+	# Either full or short hash of the current commit. Useful for versions like '1.0.0-[24386f9]'
+	# Requires git installed and project inside git repository.
+	
+	# Length of the hash. -1 is the whole hash (40 characters) but most of the times is is shortenet to the 7 initial characters
+#	var length := 7
+#	var output := []
+#	OS.execute("git", PoolStringArray(["rev-parse", "HEAD"]), true, output)
+#	if output.empty() or output[0].empty():
+#		push_error("Failed to fetch version. Make sure you have git installed and project is inside valid git directory.")
+#	else:
+#		return output[0].trim_suffix("\n").substr(0, length)
 	
 	### Profile version ### -----------------------------------------------------------------------
 	
