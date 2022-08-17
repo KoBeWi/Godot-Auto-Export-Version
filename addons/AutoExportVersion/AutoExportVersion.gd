@@ -2,10 +2,10 @@
 class_name AutoExportVersion
 extends EditorPlugin
 
+## Edit the "res://addons/AutoExportVersion/AutoExportVersion.gd" script to configure the plugin.
+## The most important thing is the get_version() method.
 
 ####################################################################################################
-####################################################################################################
-
 
 ## Change the code of this method to return a String that will identify your version.           [br]
 ## You can use the arguments to customize your version, for example based on selected platform. [br]
