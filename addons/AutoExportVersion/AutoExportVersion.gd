@@ -1,147 +1,244 @@
-tool
+@tool
+class_name AutoExportVersion
 extends EditorPlugin
 
-## Path to the version script file (bruh).
-const VERSION_SCRIPT_PATH = "res://version.gd"
 
-## Change the code of this method to return a String that will identify your version.
-## Two example ways of doing so are provided, just uncomment one of them.
-## You can use the arguments to customize your version based on selected platform or something.
-func _fetch_version(features: PoolStringArray, is_debug: bool, path: String, flags: int) -> String:
-	### Git version ### ---------------------------------------------------------------------------
-	
-	# Version is number of commits. Requires git installed
-	# and project inside git repository with at least 1 commit.
-	
-#	var output := []
-#	OS.execute("git", PoolStringArray(["rev-list", "--count", "HEAD"]), true, output)
-#	if output.empty() or output[0].empty():
-#		push_error("Failed to fetch version. Make sure you have git installed and project is inside valid git directory.")
-#	else:
-#		return output[0].trim_suffix("\n")
+####################################################################################################
+####################################################################################################
 
-	### Git branch version ### --------------------------------------------------------------------
-	
-	# Version is the current branch name. Useful for feature branches like 'release-1.0.0'
-	# Requires git installed and project inside git repository.
 
-#	var output := []
-#	OS.execute("git", PoolStringArray(["rev-parse", "--abbrev-ref", "HEAD"]), true, output)
-#	if output.empty() or output[0].empty():
-#		push_error("Failed to fetch version. Make sure you have git installed and project is inside valid git directory.")
-#	else:
-#		return output[0].trim_suffix("\n")
+## Change the code of this method to return a String that will identify your version.           [br]
+## You can use the arguments to customize your version, for example based on selected platform. [br]
+## Several utility methods are provided for the most common use cases
+func get_version(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> String:
+	var version: String = ""
+#	version += get_git_commit_count()
+	return version
+
+
+####################################################################################################
+
+
+## Locations where the version can be stored See [member STORE_LOCATION]
+enum VersionStoreLocation {
+	SCRIPT, 
+	PROJECT_SETTING,
+}
+
+## Determines where the version is saved when exporting. See [member VersionStoreLocation]                                       [br]
+## VersionStoreLocation.SCRIPT will store the version in script in path from [member SCRIPT_PATH]
+const STORE_LOCATION: VersionStoreLocation = VersionStoreLocation.SCRIPT
+
+## Path to the version script file where it is going to be saved. See [member SCRIPT_TEMPLATE]
+const SCRIPT_PATH: String = "res://version.gd"
+## This template String is going to be formatted so that it contains the version.
+const SCRIPT_TEMPLATE: String ="extends RefCounted\nconst VERSION: String = \"{version}\""
+## Name of the project setting where the version is going to be stored as a String
+const PROJECT_SETTING_NAME: String = "application/config/AutoExport/version"
+
+
+####################################################################################################
+####################################################################################################
+
+
+## Name of the current git branch                                                               [br]
+## Useful for versions like 'master-1.0.0'                                                      [br]
+## !!! Requires git installed and project inside of a git repository.
+func get_git_branch_name() -> String:
+	var output: Array = []
+	OS.execute("git", PackedStringArray(["rev-parse", "--abbrev-ref", "HEAD"]), output)
+	if output.is_empty() or output[0].is_empty():
+		push_error("Failed to fetch version. Make sure you have git installed and project is inside a valid git directory.")
+		return ""
+	return output[0].trim_suffix("\n")
+
+## Hash of the current git commit                                                               [br]
+## Based on the [param length] you can get either full or shortened hash.                       [br]
+## Useful for versions like '1.0.0-[24386f9]'                                                   [br]
+## !!! Requires git installed and project inside of a git repository.
+func get_git_commit_hash(length: int=7) -> String:
+	var output: Array = []
+	OS.execute("git", PackedStringArray(["rev-parse", "HEAD"]), output)
+	if output.is_empty() or output[0].is_empty():
+		push_error("Failed to fetch version. Make sure you have git installed and project is inside a valid git directory.")
+		return ""
+	return output[0].trim_suffix("\n").substr(0, length)
+
+## Number of git commits                                                                        [br]
+## Useful for versions like '1.0.0-463'                                                         [br]
+## !!! Requires git installed and project inside of a git repository.
+func get_git_commit_count() -> String:
+	var output: Array = []
+	OS.execute("git", PackedStringArray(["rev-list", "--count", "HEAD"]), output)
+	if output.is_empty() or output[0].is_empty():
+		push_error("Failed to fetch version. Make sure you have git installed and project is inside a valid git directory.")
+		return ""
+	return output[0].trim_suffix("\n")
+
+## Version from an export profile                                                               [br]
+## The version will be the first non-empty version value from the first profile with that value.[br]
+## Useful for versions like '1.0.0'                                                             [br]
+## !!! Requires export_presets.cfg to exist.
+func get_export_preset_version() -> String:
+	const version_keys: Array[String] = [
+		"file_version", # Windows
+		"product_version", # Windows
+		"version/name", # Android
+		"version/code", # Android
+		"application/short_version", # Mac/iOS
+		"application/version", # Mac/iOS
+	]
 	
-	### Profile version ### -----------------------------------------------------------------------
+	var config: ConfigFile = ConfigFile.new()
+	var err: int = config.load("res://export_presets.cfg")
+	if err != OK:
+		push_error("Cannot open 'res://export_presets.cfg'. Error: %s" % error_string(err))
+		return ""
 	
-	# Extracts version from an export profile. Requires export_presets.cfg to exist. 
-	# The version will be taken from the first profile that contains non-empty value
-	# in one of the version_keys.
+	for section in config.get_sections():
+		if not section.ends_with(".options"):
+			continue
+		for key in config.get_section_keys(section):
+			for check_key in version_keys:
+				if key.ends_with(check_key):
+					var version: String =  str(config.get_value(section, key))
+					if version.is_empty():
+						continue 
+					return version
 	
-#	var version_keys := ["file_version", "product_version", "version/name"]
-#
-#	var config := ConfigFile.new()
-#	if config.load("res://export_presets.cfg") == OK:
-#		var version := ""
-#		var found: bool
-#
-#		for section in config.get_sections():
-#			if section.ends_with(".options"):
-#				for key in config.get_section_keys(section):
-#					for check_key in version_keys:
-#						if key.ends_with(check_key):
-#							version = str(config.get_value(section, key))
-#							found = true
-#
-#						if found:
-#							break
-#				if found:
-#					break
-#			if found:
-#				break
-#
-#		if not found:
-#			push_error("Failed to fetch version. No valid version key found in export profiles.")
-#		else:
-#			return version
-#	else:
-#		push_error("Failed to fetch version. export_presets.cfg does not exist.")
-	
-	### Android version ### -----------------------------------------------------------------------
-	
-	# Similar to profile version, but uses only Android version code and name.
-	# Edit it if you want to format the version differently.
-	
-#	var config := ConfigFile.new()
-#	if config.load("res://export_presets.cfg") == OK:
-#		var code := ""
-#		var vname := ""
-#		var found: int
-#
-#		for section in config.get_sections():
-#			if section.ends_with(".options"):
-#				for key in config.get_section_keys(section):
-#					if key == "version/code":
-#						code = str(config.get_value(section, key))
-#						found |= 1
-#					elif key == "version/name":
-#						vname = str(config.get_value(section, key))
-#						found |= 2
-#
-#						if found == 3:
-#							break
-#				if found == 3:
-#					break
-#			if found == 3:
-#				break
-#
-#		if found != 3:
-#			push_error("Failed to fetch version. No valid version code and name found in export profiles.")
-#		else:
-#			# Edit formatting here.
-#			return "%s %s" % [code, vname]
-#	else:
-#		push_error("Failed to fetch version. export_presets.cfg does not exist.")
-	
+	push_error("Failed to fetch version. No valid version key found in export profiles.")
 	return ""
 
-### Unimportant stuff here.
+## Version name from an android export profile                                                  [br]
+## Useful for versions like '1.0.0'                                                             [br]
+## !!! Requires export_presets.cfg to exist.
+func get_export_preset_android_version_name() -> String:
+	var config: ConfigFile = ConfigFile.new()
+	var err: int = config.load("res://export_presets.cfg")
+	if err != OK:
+		push_error("Cannot open 'res://export_presets.cfg'. Error: %s" % error_string(err))
+		return ""
+	
+	var version_name: String = ""
+	
+	for section in config.get_sections():
+		if not section.ends_with(".options"):
+			continue
+		version_name = str(config.get_value(section, "version/name", ""))
+		if not version_name.is_empty():
+			return version_name
+	
+	push_error("Failed to fetch version name. version/name in android preset is empty")
+	return ""
 
-var exporter: AEVExporter
+## Version code from an android export profile                                                  [br]
+## Useful for versions like '1.0.0-1'                                                           [br]
+## !!! Requires export_presets.cfg to exist.
+func get_export_preset_android_version_code() -> String:
+	var config: ConfigFile = ConfigFile.new()
+	var err: int = config.load("res://export_presets.cfg")
+	if err != OK:
+		push_error("Cannot open 'res://export_presets.cfg'. Error: %s" % error_string(err))
+		return ""
+	
+	var version_code: String = ""
+	
+	for section in config.get_sections():
+		if not section.ends_with(".options"):
+			continue
+		version_code = str(config.get_value(section, "version/code", ""))
+		if not version_code.is_empty():
+			return version_code
+	
+	push_error("Failed to fetch version code. version/code in android preset is empty")
+	return ""
+
+## Stores a [param version] based on [param version_store_location].                            [br]
+## See [member PROJECT_SETTING_NAME], [member SCRIPT_PATH]
+func store_version(version: String, version_store_location: VersionStoreLocation=VersionStoreLocation.PROJECT_SETTING) -> void:
+	match version_store_location:
+		VersionStoreLocation.SCRIPT:
+			store_version_as_script(version)
+		VersionStoreLocation.PROJECT_SETTING:
+			store_version_as_project_setting(version)
+
+## Stores the version as a script based on [member SCRIPT_TEMPLATE] in [member SCRIPT_PATH].
+func store_version_as_script(version: String) -> void:
+	if version.is_empty():
+		printerr("Cannot store version. " + _EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
+		return
+	
+	var script: GDScript = GDScript.new()
+	script.source_code = SCRIPT_TEMPLATE.format({"version": version})
+	var err: int = ResourceSaver.save(script, SCRIPT_PATH)
+	if err:
+		push_error("Failed to save version as script. Error: %s" % error_string(err))
+
+## Stores the version in ProjectSettings.                                                       [br]
+## If the [param persistent] is true, then it is going to be written to the project.godot as well.
+func store_version_as_project_setting(version: String, persistent: bool=false) -> void:
+	if version.is_empty():
+		printerr("Cannot store version. " + _EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
+		return
+	
+	ProjectSettings.set_setting(PROJECT_SETTING_NAME, version)
+	if persistent:
+		ProjectSettings.save()
+		ProjectSettings.set_initial_value(PROJECT_SETTING_NAME, "Empty version")
+		ProjectSettings.add_property_info({
+			"name": PROJECT_SETTING_NAME,
+			"type": TYPE_STRING,
+			"hint": PROPERTY_HINT_PLACEHOLDER_TEXT,
+			"hint_string": "Will overriden on export by AutoExportVersion plugin"
+		})
+
+
+
+####################################################################################################
+#################################  Unimportant plugin stuff here  ##################################
+####################################################################################################
+
+
+const _CURRENT_VERSION: String = "Current version: {version}"
+const _EMPTY_VERSION_ERROR: String = "Version string is empty.\nMake sure your 'get_version()' in '{script_path}' is configured properly."
+
+const _TOOL_MENU_ITEM_NAME: String = "AutoExport: Print Current Version"
+
+var _exporter: AutoExportVersionExporter
+
 
 func _enter_tree() -> void:
-	exporter = AEVExporter.new()
-	exporter.plugin = self
-	add_export_plugin(exporter)
-	add_tool_menu_item("Print Current Version", self, "print_version")
+	_exporter = AutoExportVersionExporter.new()
+	_exporter.plugin = self
+	add_export_plugin(_exporter)
+	add_tool_menu_item(_TOOL_MENU_ITEM_NAME, _tool_menu_print_version)
 	
-	if not File.new().file_exists(VERSION_SCRIPT_PATH):
-		exporter.store_version(_fetch_version(PoolStringArray(), true, "", 0))
+	if not File.new().file_exists(SCRIPT_PATH):
+		store_version(get_version(PackedStringArray(), true, "", 0), VersionStoreLocation.SCRIPT)
 
 func _exit_tree() -> void:
-	remove_export_plugin(exporter)
-	remove_tool_menu_item("Print Current Version")
+	remove_export_plugin(_exporter)
+	remove_tool_menu_item(_TOOL_MENU_ITEM_NAME)
 
-func print_version(ud):
-	var v = _fetch_version(PoolStringArray(), true, "", 0)
-	if v.empty():
-		OS.alert("Error fetching version. Check console for details.")
-	else:
-		OS.alert("Current game version: %s" % v)
-		print(v)
-
-class AEVExporter extends EditorExportPlugin:
-	var plugin
+func _tool_menu_print_version() -> void:
+	var version: String = get_version(PackedStringArray(), true, "", 0)
 	
-	func _export_begin(features: PoolStringArray, is_debug: bool, path: String, flags: int):
-		var version: String = plugin._fetch_version(features, is_debug, path, flags)
-		if version.empty():
-			push_error("Version string is empty. Make sure your _fetch_version() is configured properly.")
-		
-		store_version(version)
+	if version.is_empty():
+		printerr(_EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
+		OS.alert(_EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
+		return
+	
+	print(_CURRENT_VERSION.format({"version":version}))
+	OS.alert(_CURRENT_VERSION.format({"version":version}))
 
-	func store_version(version: String):
-		var script = GDScript.new()
-		script.source_code = str("extends Reference\nconst VERSION = \"", version, "\"\n")
-		if ResourceSaver.save(VERSION_SCRIPT_PATH, script) != OK:
-			push_error("Failed to save version file. Make sure the path is valid.")
+
+class AutoExportVersionExporter extends EditorExportPlugin:
+	var plugin: EditorPlugin
+	
+	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
+		if not plugin:
+			push_error("No plugin set in AutoExportVersionExporter")
+			return
+		
+		var version: String = plugin.get_version(features, is_debug, path, flags)
+		plugin.store_version(version, plugin.STORE_LOCATION)
