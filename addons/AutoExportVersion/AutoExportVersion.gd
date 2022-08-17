@@ -9,10 +9,17 @@ extends EditorPlugin
 
 ## Change the code of this method to return a String that will identify your version.           [br]
 ## You can use the arguments to customize your version, for example based on selected platform. [br]
-## Several utility methods are provided for the most common use cases
+## Several utility methods are provided for the most common use cases. You can simply uncomment one
+## of the lines in this method or combine them in any way.
 func get_version(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> String:
 	var version: String = ""
+	
 #	version += get_git_commit_count()
+#	version += get_git_branch_name()
+#	version += get_git_commit_hash()
+#	version += get_export_preset_version()
+#	version += get_export_preset_android_version_code() + " " + get_export_preset_android_version_name()
+	
 	return version
 
 
@@ -25,15 +32,15 @@ enum VersionStoreLocation {
 	PROJECT_SETTING,
 }
 
-## Determines where the version is saved when exporting. See [member VersionStoreLocation]                                       [br]
-## VersionStoreLocation.SCRIPT will store the version in script in path from [member SCRIPT_PATH]
+## Determines where the version is saved when exporting. See [member VersionStoreLocation].                                       [br]
+##  VersionStoreLocation.SCRIPT will store the version in script in path from [member SCRIPT_PATH]
 const STORE_LOCATION: VersionStoreLocation = VersionStoreLocation.SCRIPT
 
 ## Path to the version script file where it is going to be saved. See [member SCRIPT_TEMPLATE]
 const SCRIPT_PATH: String = "res://version.gd"
 ## This template String is going to be formatted so that it contains the version.
 const SCRIPT_TEMPLATE: String ="extends RefCounted\nconst VERSION: String = \"{version}\""
-## Name of the project setting where the version is going to be stored as a String
+## Name of the project setting where the version is going to be stored as a String.
 const PROJECT_SETTING_NAME: String = "application/config/AutoExport/version"
 
 
@@ -65,7 +72,7 @@ func get_git_commit_hash(length: int=7) -> String:
 	return output[0].trim_suffix("\n").substr(0, length)
 
 ## Number of git commits                                                                        [br]
-## Useful for versions like '1.0.0-463'                                                         [br]
+## Useful for versions like 'v.463'                                                         [br]
 ## !!! Requires git installed and project inside of a git repository.
 func get_git_commit_count() -> String:
 	var output: Array = []
@@ -155,7 +162,7 @@ func get_export_preset_android_version_code() -> String:
 
 ## Stores a [param version] based on [param version_store_location].                            [br]
 ## See [member PROJECT_SETTING_NAME], [member SCRIPT_PATH]
-func store_version(version: String, version_store_location: VersionStoreLocation=VersionStoreLocation.PROJECT_SETTING) -> void:
+func store_version(version: String, version_store_location := VersionStoreLocation.PROJECT_SETTING) -> void:
 	match version_store_location:
 		VersionStoreLocation.SCRIPT:
 			store_version_as_script(version)
@@ -176,7 +183,7 @@ func store_version_as_script(version: String) -> void:
 
 ## Stores the version in ProjectSettings.                                                       [br]
 ## If the [param persistent] is true, then it is going to be written to the project.godot as well.
-func store_version_as_project_setting(version: String, persistent: bool=false) -> void:
+func store_version_as_project_setting(version: String, persistent := false) -> void:
 	if version.is_empty():
 		printerr("Cannot store version. " + _EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
 		return
@@ -214,7 +221,7 @@ func _enter_tree() -> void:
 	add_tool_menu_item(_TOOL_MENU_ITEM_NAME, _tool_menu_print_version)
 	
 	if not File.new().file_exists(SCRIPT_PATH):
-		store_version(get_version(PackedStringArray(), true, "", 0), VersionStoreLocation.SCRIPT)
+		store_version_as_script(get_version(PackedStringArray(), true, "", 0))
 
 func _exit_tree() -> void:
 	remove_export_plugin(_exporter)
