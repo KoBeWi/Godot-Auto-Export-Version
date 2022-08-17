@@ -45,7 +45,7 @@ Script/setting path and version script format are configurable. You can refer to
 
 If you want to print the current version without exporting the project, you can use the option in Project -> Tools menu called 'Print Current Version'.
 
-Special thanks to @Kubulambula for refactoring the plugin and porting it to Godot 4.0.
+Special thanks to [@Kubulambula](https://github.com/Kubulambula) for refactoring the plugin and porting it to Godot 4.0.
 
 ___
 You can find all my addons on my [profile page](https://github.com/KoBeWi).
