@@ -220,7 +220,7 @@ func _enter_tree() -> void:
 	add_export_plugin(_exporter)
 	add_tool_menu_item(_TOOL_MENU_ITEM_NAME, _tool_menu_print_version)
 	
-	if STORE_LOCATION == VersionStoreLocation.SCRIPT and not File.new().file_exists(SCRIPT_PATH):
+	if STORE_LOCATION == VersionStoreLocation.SCRIPT and not FileAccess.file_exists(SCRIPT_PATH):
 		store_version_as_script(get_version(PackedStringArray(), true, "", 0))
 
 func _exit_tree() -> void:
