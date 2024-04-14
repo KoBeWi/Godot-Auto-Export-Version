@@ -209,7 +209,7 @@ func store_version_as_project_setting(version: String, persistent := false) -> v
 const _CURRENT_VERSION: String = "Current version: {version}"
 const _EMPTY_VERSION_ERROR: String = "Version string is empty.\nMake sure your 'get_version()' in '{script_path}' is configured properly."
 
-const _TOOL_MENU_ITEM_NAME: String = "AutoExport: Print Current Version"
+const _TOOL_MENU_ITEM_NAME: String = "AutoExport: Print and Update Current Version"
 
 var _exporter: AutoExportVersionExporter
 
@@ -231,13 +231,13 @@ func _tool_menu_print_version() -> void:
 	var version: String = get_version(PackedStringArray(), true, "", 0)
 	
 	if version.is_empty():
-		printerr(_EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
-		OS.alert(_EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
+		printerr(_EMPTY_VERSION_ERROR.format({ "script_path": get_script().get_path() }))
+		OS.alert(_EMPTY_VERSION_ERROR.format({ "script_path": get_script().get_path() }))
 		return
 	
-	print(_CURRENT_VERSION.format({"version":version}))
-	OS.alert(_CURRENT_VERSION.format({"version":version}))
-
+	print(_CURRENT_VERSION.format({ "version": version }))
+	OS.alert(_CURRENT_VERSION.format({ "version": version }))
+	store_version(version, STORE_LOCATION)
 
 class AutoExportVersionExporter extends EditorExportPlugin:
 	var plugin: EditorPlugin
