@@ -26,22 +26,23 @@ func get_version(features: PackedStringArray, is_debug: bool, path: String, flag
 ####################################################################################################
 
 
-## Locations where the version can be stored See [member STORE_LOCATION]
+## Locations where the version can be stored See [constant STORE_LOCATION].
 enum VersionStoreLocation {
+	## Store the version in script at path from [constant SCRIPT_PATH].
 	SCRIPT, 
+	## Store the version in project setting [constant PROJECT_SETTING_NAME].
 	PROJECT_SETTING,
 }
 
 ## Determines where the version is saved when exporting. See [member VersionStoreLocation].                                       [br]
-##  VersionStoreLocation.SCRIPT will store the version in script in path from [member SCRIPT_PATH]
-const STORE_LOCATION: VersionStoreLocation = VersionStoreLocation.SCRIPT
+const STORE_LOCATION: VersionStoreLocation = VersionStoreLocation.PROJECT_SETTING
 
 ## Path to the version script file where it is going to be saved. See [member SCRIPT_TEMPLATE]
 const SCRIPT_PATH: String = "res://version.gd"
 ## This template String is going to be formatted so that it contains the version.
 const SCRIPT_TEMPLATE: String ="extends RefCounted\nconst VERSION: String = \"{version}\""
 ## Name of the project setting where the version is going to be stored as a String.
-const PROJECT_SETTING_NAME: String = "application/config/AutoExport/version"
+const PROJECT_SETTING_NAME: String = "application/config/version"
 
 
 ####################################################################################################
@@ -181,16 +182,13 @@ func store_version_as_script(version: String) -> void:
 	if err:
 		push_error("Failed to save version as script. Error: %s" % error_string(err))
 
-## Stores the version in ProjectSettings.                                                       [br]
-## If the [param persistent] is true, then it is going to be written to the project.godot as well.
-func store_version_as_project_setting(version: String, persistent := false) -> void:
+## Stores the version in ProjectSettings.
+func store_version_as_project_setting(version: String) -> void:
 	if version.is_empty():
 		printerr("Cannot store version. " + _EMPTY_VERSION_ERROR.format({"script_path": get_script().get_path()}))
 		return
 	
-	ProjectSettings.set_setting(PROJECT_SETTING_NAME, version)
-	if persistent:
-		ProjectSettings.save()
+	if not ProjectSettings.has_setting(PROJECT_SETTING_NAME):
 		ProjectSettings.set_initial_value(PROJECT_SETTING_NAME, "Empty version")
 		ProjectSettings.add_property_info({
 			"name": PROJECT_SETTING_NAME,
@@ -198,6 +196,9 @@ func store_version_as_project_setting(version: String, persistent := false) -> v
 			"hint": PROPERTY_HINT_PLACEHOLDER_TEXT,
 			"hint_string": "Will overriden on export by AutoExportVersion plugin"
 		})
+	
+	ProjectSettings.set_setting(PROJECT_SETTING_NAME, version)
+	ProjectSettings.save()
 
 
 
