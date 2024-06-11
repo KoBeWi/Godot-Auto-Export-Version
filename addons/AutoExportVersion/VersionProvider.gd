@@ -41,6 +41,18 @@ func get_git_commit_count() -> String:
 		return ""
 	return output[0].trim_suffix("\n")
 
+## Number of git commits ahead branch                                                           [br]
+## Useful for versions like '1.6.4'                                                             [br]
+## Recommended to use in combo get_git_branch_name() + "." + get_git_commit_ahead_branch_count(main), when branch name is like '1.6' [br]
+## !!! Requires git installed and project inside of a git repository.
+func get_git_commit_ahead_branch_count(branch_name: String) -> String:
+	var output: Array = []
+	OS.execute("git", PackedStringArray(["rev-list", "--count", "HEAD", "^" + branch_name]), output)
+	if output.is_empty() or output[0].is_empty():
+		push_error("Failed to fetch version. Make sure you have git installed and project is inside a valid git directory.")
+		return "0"
+	return output[0].trim_suffix("\n")
+
 ## Version from an export profile                                                               [br]
 ## The version will be the first non-empty version value from the first profile with that value.[br]
 ## Useful for versions like '1.0.0'                                                             [br]
