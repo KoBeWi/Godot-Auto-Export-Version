@@ -152,6 +152,9 @@ func get_version(features: PackedStringArray, is_debug: bool, path: String, flag
 class AutoExportVersionExporter extends EditorExportPlugin:
 	var plugin: EditorPlugin
 	
+	func _get_name() -> String:
+		return "Auto Export Version"
+
 	func _export_begin(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> void:
 		if not plugin:
 			push_error("No plugin set in AutoExportVersionExporter")
