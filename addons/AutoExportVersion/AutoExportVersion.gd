@@ -64,8 +64,9 @@ func store_version_as_project_setting(version: String) -> void:
 			"hint_string": "Will overriden on export by AutoExportVersion plugin"
 		})
 	
-	ProjectSettings.set_setting(PROJECT_SETTING_NAME, version)
-	ProjectSettings.save()
+	if ProjectSettings.get_setting(PROJECT_SETTING_NAME) != version:
+		ProjectSettings.set_setting(PROJECT_SETTING_NAME, version)
+		ProjectSettings.save()
 
 
 const _CURRENT_VERSION: String = "Current version: {version}"
