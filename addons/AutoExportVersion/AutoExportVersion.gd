@@ -69,18 +69,25 @@ func store_version_as_project_setting(version: String) -> void:
 		ProjectSettings.save()
 
 
-const _CURRENT_VERSION: String = "Current version: {version}"
-const _EMPTY_VERSION_ERROR: String = "Version string is empty.\nMake sure your 'get_version()' in '{script_path}' is configured properly."
-
-const _TOOL_MENU_ITEM_NAME: String = "AutoExport: Print and Update Current Version"
+var _CURRENT_VERSION: String
+var _EMPTY_VERSION_ERROR: String
+var _TOOL_MENU_ITEM_NAME: String
 
 var _exporter: AutoExportVersionExporter
 
+func _init() -> void:
+	add_plugin_translations_from_directory("res://addons/AutoExportVersion/Translations")
+
 func _enter_tree() -> void:
+	_CURRENT_VERSION = tr_extract.tr("Current version: {version}")
+	_EMPTY_VERSION_ERROR = tr_extract.tr("Version string is empty.\nMake sure your 'get_version()' in '{script_path}' is configured properly.")
+	_TOOL_MENU_ITEM_NAME = tr_extract.tr("AutoExportVersion: Print and Update Current Version")
+	
 	_exporter = AutoExportVersionExporter.new()
 	_exporter.plugin = self
 	add_export_plugin(_exporter)
 	add_tool_menu_item(_TOOL_MENU_ITEM_NAME, _tool_menu_print_version)
+	EditorInterface.get_command_palette().add_command(_TOOL_MENU_ITEM_NAME, "auto_export_version/print_and_update", _tool_menu_print_version)
 	
 	STORE_LOCATION = define_project_setting("addons/AutoExportVersion/version_store_location", STORE_LOCATION, PROPERTY_HINT_ENUM, "Script,Project Setting")
 	SCRIPT_PATH = define_project_setting("addons/AutoExportVersion/version_file_path", SCRIPT_PATH, PROPERTY_HINT_SAVE_FILE)
@@ -123,12 +130,12 @@ func _tool_menu_print_version() -> void:
 	var version: String = get_version(PackedStringArray(), true, "", 0)
 	
 	if version.is_empty():
-		printerr(_EMPTY_VERSION_ERROR.format({ "script_path": get_script().get_path() }))
-		OS.alert(_EMPTY_VERSION_ERROR.format({ "script_path": get_script().get_path() }))
+		EditorInterface.get_editor_toaster().push_toast(tr(_EMPTY_VERSION_ERROR).format({ "script_path": get_script().get_path() }), EditorToaster.SEVERITY_ERROR)
+		OS.alert(tr(_EMPTY_VERSION_ERROR).format({ "script_path": get_script().get_path() }))
 		return
 	
-	print(_CURRENT_VERSION.format({ "version": version }))
-	OS.alert(_CURRENT_VERSION.format({ "version": version }))
+	EditorInterface.get_editor_toaster().push_toast(tr(_CURRENT_VERSION).format({ "version": version }), EditorToaster.SEVERITY_INFO)
+	OS.alert(tr(_CURRENT_VERSION).format({ "version": version }))
 	store_version(version, STORE_LOCATION)
 
 func get_version(features: PackedStringArray, is_debug: bool, path: String, flags: int) -> String:

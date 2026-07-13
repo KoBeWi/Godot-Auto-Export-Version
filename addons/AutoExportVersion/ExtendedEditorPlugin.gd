@@ -101,17 +101,20 @@ func _on_setting_changed(setting: String):
 	pass
 
 func _notification(what: int) -> void:
-	match what:
-		NOTIFICATION_ENTER_TREE:
-			if not tr_extract:
-				tr_extract = RefCounted.new()
-				tr_extract.set_message_translation(false)
-			
-			var domain := TranslationServer.get_or_add_domain(&"godot.editor")
-			for translation in _translation_list:
-				domain.add_translation(translation)
+	if what == NOTIFICATION_ENTER_TREE:
+		if not tr_extract:
+			tr_extract = RefCounted.new()
+			tr_extract.set_message_translation(false)
 		
-		NOTIFICATION_EXIT_TREE:
-			var domain := TranslationServer.get_or_add_domain(&"godot.editor")
-			for translation in _translation_list:
-				domain.remove_translation(translation)
+		var domain := TranslationServer.get_or_add_domain(&"godot.editor")
+		for translation in _translation_list:
+			domain.add_translation(translation)
+		
+		return
+	
+	if what == NOTIFICATION_EXIT_TREE:
+		var domain := TranslationServer.get_or_add_domain(&"godot.editor")
+		for translation in _translation_list:
+			domain.remove_translation(translation)
+		
+		return
