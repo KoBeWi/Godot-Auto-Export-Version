@@ -44,7 +44,7 @@ func _ready():
 	text = "v%s" % load("res://version.gd").VERSION
 ```
 
-If you want to print/update the current version without exporting the project, you can use the option in Project -> Tools menu called 'Print and Update Current Version'. This will display the version and update it as if the export was started.
+If you want to print/update the current version without exporting the project, you can use the option in Project -> Tools menu called 'Print and Update Current Version'. This will display the version and update it as if the export was started. The option is also available in the Command Palette.
 
 Special thanks to [@Kubulambula](https://github.com/Kubulambula) for refactoring the plugin and porting it to Godot 4.0.
 
