@@ -50,7 +50,7 @@ Special thanks to [@Kubulambula](https://github.com/Kubulambula) for refactoring
 
 ## Localization
 
-The addon supports translations and will automatically use the editor's language, if available. Currently only Polish translation is available. To make a new translation use the QuickSceneRunner.pot file found in the addon's folder and feel free to open a pull request.
+The addon supports translations and will automatically use the editor's language, if available. Currently only Polish translation is available. To make a new translation use the Template.pot file found in the addon's folder and feel free to open a pull request.
 
 ___
 You can find all my addons on my [profile page](https://github.com/KoBeWi).
