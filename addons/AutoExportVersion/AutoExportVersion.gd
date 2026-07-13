@@ -109,6 +109,7 @@ func _sync_project_settings():
 				cached.take_over_path(new_config_path)
 			
 			DirAccess.rename_absolute(CONFIG_PATH, new_config_path)
+			DirAccess.rename_absolute(CONFIG_PATH + ".uid", new_config_path + ".uid")
 			EditorInterface.get_resource_filesystem().update_file(CONFIG_PATH)
 			EditorInterface.get_resource_filesystem().update_file(new_config_path)
 		
